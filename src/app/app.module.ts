@@ -13,7 +13,7 @@ import { ReactiveFormComponent } from './reactive-form/reactive-form.component';
 import { Code404Component } from './code404/code404.component';
 import { FormComponent } from './form/form.component';
 import { HelpComponent } from './help/help.component';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService }  from './service/in-memory-data.service';
 import { HeroSearchComponent } from './hero-search/hero-search.component';
@@ -28,6 +28,7 @@ import { ValidateFormComponent } from './validate-form/validate-form.component';
 import { MobileValidatorDirective } from './directive/mobile-validator.directive';
 import { PipeComponent } from './pipe/pipe.component';
 import { MultiplePipe } from './pipes/multiple.pipe';
+import {InterceptorService} from './service/interceptor.service';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { MultiplePipe } from './pipes/multiple.pipe';
   providers: [
     {provide: HeroService, useClass: HeroService},
     {provide: ProductService, useClass: ProductService},
-    LoggerService
+    LoggerService,
+    { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true },
     ],
   bootstrap: [AppComponent]
 })
