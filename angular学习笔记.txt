@@ -1,0 +1,362 @@
+一：基本概念
+  1.angular的两个重要版本：1.5和4.0,前者称为angularJs，后者称为angular,可以认为是两套完全不同的框架，后者全部重写
+  2.angularJs的优点：
+    模板功能强大丰富：具有丰富的指令，数据双向绑定等功能，大大减少代码量
+    比较完善的前端mvc框架：具有路由、http请求、模块化、服务、依赖注入等功能，基本web开发所需的东西基本都有
+  3.angularJs的问题：
+    性能问题:
+      angularjs采用脏值检查（就是遍历所有的双向绑定数据）来实现双向绑定，而几乎任何操作都会触发脏值检查，
+      这样一来当绑定的变量越来越多的时候，遍历所消耗的性能就越来越多，因此会出现卡顿。而angular默认采用数据单项绑定，并且重写
+      脏检查机制，因此应能大大提升
+    作用域问题：
+      angularjs的作用域和浏览器环境和angularjs的执行环境彻底隔离开，所有原生的事件都不能影响angularjs的作用域，所以无法使用
+      原生事件，如果想使用click只能使用ngClick,使用原生事件必须使用$scope.apply()来告诉angualrjs数据有更新，提醒其更新ui,
+      而angular彻底废除该api,而且可以使用原生事件
+  4.angualr的新特性：
+    全新的命令行工具：angularCli
+    服务器端渲染：
+    移动和桌面兼容：ionic
+  5.与其他框架对比：
+    速度：
+      react采用虚拟dom,这会使页面跟新的次数少，而且每次更新的内容也是最少的，因此性能很快,而angualr的新的变更检测算法也
+      使得其速度与react不相上下
+  6：
+    组件：是angualr应用的基本构建快，你可以吧一个组件理解为一段带有业务逻辑的数据的html
+    服务：用来封装可重用的业务逻辑
+    指令：允许你想html元素添加自定义行为
+    模块：用来将应用中不同的部分组织为一个angualr框架可以理解的单元
+
+
+二：搭建环境：
+  1.常用命令：
+    npm install -g @angular/cli
+    npm install @types/jquery --save    安装类型描述文件
+    ng new demo --skip-install		ng new -si 不用angular默认的npm安装依赖
+    ng new demo --style=scss		    指定样式风格，默认为css
+    ng new demo --routing    加上routing参数会在app面多生产一个app-routing.module.ts文件
+    ng g m core 创建一个core模块
+    ng g c core/header 创建一个组件
+    ng g directive demo 创建一个指令
+    ng serve 启动服务
+  2.组件的必备元素：装饰器、模板、控制器
+    组件的可选注入对象：输入属性、提供器、生命周期钩子
+    组件的可选输出对象：样式表、动画、输出属性
+  3. NgModule装饰器来声明一个模块
+    declarations属性声明模块中有什么东西，这里只能声明组件、指令、管道
+    imports属性声明此模块依赖的其他摸块
+    providers声明模块提供的服务,这些服务是需要依赖注入的，这里定义了一个对象在被注入到组件之前如何被实例化
+    bootstrap声明模块的主组件
+  4.启动过程：main.ts入口文件，启动AppModule作为启动模块，然后加载AppModule，并且加载AppModule所依赖的所有依赖及服务。
+  在AppModule中又根据@NgModule里面的bootstrap启动该模块的主组件。进入到主组件又会根据@Component中声明的样式、模板一次加载
+  5.安装第三方类库：
+    npm install jquery --save
+    npm install @types/jquery --save-dev
+
+    npm install bootstrap --save
+    npm install @types/bootstrap --save-dev
+
+    在angualr.json文件中的styles和scripts数组中添加相应依赖的css文件和js文件
+    也可以使用命令行ng add代替上面的操作，如：ng add ng-zorro-antd
+三.路由：
+  1.路由的几个重要的对象：
+    1.Routes 路由配置，保存着那个url对应显示那个组件，以及在那个RouterOutlet中展示组件
+    2.RouterOutlet在html中标记路由内容呈现的占位符指令
+    3.Router负责在运行时执行路由的对象，可以通过调用起navigate()和navigateByUrl()方法来导航到一个指定的路由
+    4.RouterLink在HTML中声明路由导航用滚动指令
+    5.ActivateRoute当前激活的路由对象，保存着当前路由的信息，如路由地址，路由参数等
+    * 注意：
+    * 1.路由的路径不能写‘/’,因为这样是代表根路由，而首层路由，默认是根路由
+    * 2.**匹配前面匹配不到的路由
+  2.使用路由：
+    1.在app-routing.module.ts中配置路由：
+      const routes:Routes = [{path: 'form', component: FormComponent}]
+      注意使用通配符来指定不存在页面的路由信息，放在路由配置的最后面
+      {path: '**', component: Code404Component}
+    2.在组件的HTML模板中定义路由跳转
+      <a href="#" [routerLink]="['/dashboard']">仪表盘</a>
+    3.利用占位符在html中说明路由组件显示的位置：
+      <router-outlet></router-outlet>
+  3.编程式导航：
+    1.在构造函数中依赖注入Router
+      constructor(private router:Router){}
+    2.写js代码来导航
+      this.router.navigate(['/dashboard'])
+  4.路由传参：
+    1.查询参数中传递数据：
+      1.<a href="#" [routerLink]="['/product']" [queryParams]="{id:1,name:2}">英雄列表</a>
+      2.地址栏的路由就变成这样的：/product?id=1&name=2
+      3.在组件中注入ActivatedRote并使用
+        constructor(private routeInfo:ActivatedRote){}
+        在函数中使用：this.id = this.routeInfo.snapshot.queryParams['id']
+    2.在路由路径中传递参数
+      1.修改路由配置信息
+        {path: 'message/:id',component: MessagesComponent}
+      2.路由跳转中添加参数
+        <a [routerLink]="['/message',2]">信息</a>
+      3.地址栏的路由就变成这样的：/message/1
+      4.在组件中注入ActivatedRote并使用
+        constructor(private routeInfo:ActivatedRote){}
+        在函数中使用：this.id = this.routeInfo.snapshot.params['id']
+    3.路由配置中传递参数：
+      {path: 'form', component: FormComponent,data:[{isProd:true}]}   => ActivatedRote.data[0][isProd]
+    4.参数订阅和参数快照：
+        快照：this.id = this.routeInfo.snapshot.params['id']
+        订阅：this.routeInfo.params.subscribe((params:Params) => this.id = params['id'])
+        当routerLink路由和编程式路由到同一个页面的情况下，并且该页面在ngOnInit钩子中去获取该参数时，会出现参数不更新的
+        情况，这是因为，routerLink路由导航到该页面的情况下，再有编程导航到该页面，因为是同一个页面，所以不会重新初始化，
+        ngOnInit只会在组件创建的时候执行一次，所以就不会再次执行，自然数据不会更新，而订阅会更新。
+    5.重定向路由：
+      {path: '', redirectTo: '/form', pathMatch: 'full'}
+    6.子路由
+      const routes:Routes = [{path: 'form', component: FormComponent, children:[
+          {path: '', component: ReactiveFormComponent},
+          {path: 'template', component: TemplateFormComponent},
+        ], canActivate: [LoginGuard], canDeactivate: [UnsavedGuard]
+      }]
+    7.辅助路由：
+      1.在组件模板中声明主路由的时候还要声明辅助路由的位置，并用name属性指定该辅助路由显示的组件
+        <router-outlet></router-outlet>
+        <router-outlet name="aux"></router-outlet>
+      2.在路由配置中配置name属性为aux的辅助路由可以显示那些组件,这里可以aux辅助路由可以显示xxx及yyy组件，其他组件不可以
+        {path: 'xxx', component: xxxComponent,outlet:"aux"},
+        {path: 'yyy', component: yyyComponent,outlet:"aux"}
+      3.在路由跳转的时候除了指定主路由的位置，还要指定辅助路由的信息
+        <a href="#" [routerLink]="['/dashboard'，outlets:{aux:xxx}]">仪表盘</a>
+        <a href="#" [routerLink]="['/asda'，outlets:{aux:yyy}]">仪表盘</a>
+    8.路由守卫
+      1.canActivate：处理导航到某路由的情况
+        1.定义路由守卫，新建login.guard.ts文件并建立类继承CanActivate接口，并重写CanActivate方法
+          export class LoginGuard implements CanActivate {
+            canActivate(){}
+          }
+        2.在路由配置中增加该守卫，数组证明可以添加多个守卫
+          {path: 'form', component: FormComponent,
+            canActivate: [LoginGuard], canDeactivate: [UnsavedGuard]
+          }
+        3.在路由模块的providers属性声明路由模块所提供的守卫服务
+          providers: [LoginGuard, UnsavedGuard, ProductResolve]
+      2.canDeactivate：处理从当前路由离开的情况（用法同上）
+      3.resolve:在路由激活之前获取路由数据
+        1.新建product.resolve.ts文件并新建类继承Resolve接口，并重写resolve方法，由于此守卫要发送请求，因此
+          可能要在路由中获取参数，因此该类要@Injectable()装饰，并注入ActivatedRouteSnapshot来获取路由参数。
+        2.在路由配置中增加该守卫，将新建的守卫添加到其中
+          {
+            path: 'message/:id',
+            component: MessagesComponent,
+            resolve: { product: ProductResolve}
+          },
+        3.在路由模块的providers属性声明路由模块所提供的守卫服务
+          providers: [LoginGuard, UnsavedGuard, ProductResolve]
+        4.路由组件中获得该请求的结果
+          this.routeInfo.data.subscribe((data:{product:Product}) =>{
+            this.productId = data.product.id;
+            this.productName = data.product.name;
+          })
+四.依赖注入
+  1.提供器：
+    providers：[
+      {provide: HeroService, useClass: HeroService},
+    ]
+    注册一个类型为HeroService的token,当有组件或类声明要使用一个token为HeroService的服务时，
+      用useClass属性对应的值去实例化他
+    上面等价于 providers：[HeroService]
+
+  2.注入器：
+    一般不需要直接调用注入器的方法，而只需要在组件中的构造函数中声明你需要一个什么样的服务。注入器会自动通过组件的构造函数
+    自动为其注入所需要的服务
+
+  3.使用工厂方法声明提供器
+    providers：[
+        {provide: HeroService, useFactory: ()=>{
+          if(1){
+            return new HeroService
+          }else{
+            return new AnotherHeroService
+          }
+        }}
+      ]
+    在工厂方法的声明中可以使用提供器中其他的提供器，如下，在HeroService的工厂方法中使用提供器中的LoggerService
+    providers：[
+        {
+          provide: HeroService, useFactory: (logger:LoggerService)=>{
+            if(1){
+              return new HeroService
+            }else{
+              return new AnotherHeroService
+            }
+          },
+          deps:[LoggerService]
+        },
+        LoggerService
+      ]
+
+  4.使用值来声明提供器
+    providers：[
+        {
+          provide: HeroService, useFactory: (logger:LoggerService, isDev)=>{
+            if(isDev){
+              return new HeroService
+            }else{
+              return new AnotherHeroService
+            }
+          },
+          deps:[LoggerService, "IS_DEV_ENV"]
+        },
+        LoggerService,
+        {
+          provide:"IS_DEV_ENV",useValues:false
+        }
+      ]
+    该值也可以是对象
+     providers：[
+        {
+          provide: HeroService, useFactory: (logger:LoggerService, appConfig)=>{
+            if(appConfig.isDev){
+              return new HeroService
+            }else{
+              return new AnotherHeroService
+            }
+          },
+          deps:[LoggerService, "APP_CONFIG"]
+        },
+        LoggerService,
+        {
+          provide:"APP_CONFIG",useValues:{isDev:false}
+        }
+      ]
+  5.注入器的层级关系
+    应用启动时，angular会创建一个应用及的注入器，主模块及import进来的模块声明的提供器都会被注入到应用级的注入器中，
+    然后启动主组件，angular会创建一个主组件注入器，将组件声明的提供器注入到主组件的注入器中，当子组件被创建时，又会
+    创建一个子组件注入器。
+    组件中的提供器会反过来一次向上寻找注入器，直到应用级的注入器。
+    应用级的注入器 ----> 主组件的注入器 ---->  子组件的注入器
+五：数据绑定、响应式编程和管道
+  1.数据绑定
+    使用插值表达式将表达式的值显示在模板上：{{productName}}
+    使用方括号将html标签的属性绑定到变量： <img [src]="imgUrl">
+    使用小括号绑定事件：<button (click)="handleClick($event)">按钮</button>
+  2.angualr的数据绑定默认是单向绑定的，要么将变量的值绑定到模板上，如：{{productName}}和<img [src]="imgUrl">，
+    要么将模板上的事件绑定到控制器中，如：<button (click)="handleClick()">按钮</button>
+  3.差值表达式和属性绑定是一个东西，<img src={{imgUrl}}> == <img [src]="imgUrl">
+  4.双向数据绑定：[{NgModel}]="name"
+  5.管道：|
+六：组件通讯
+  父组件向子组件传值
+  1.输入属性：用@Input()装饰器修饰的属性为输入属性。
+  2.父组件向子组件传值：
+    在父组件写子组件的标签,并用方括号绑定变量 <app-child [stockCode]="stock"></app-child>
+    在子组件中用@Input()声明输入属性，并在模板上使用 @Input() stockCode：string
+  子组件通过自定义事件向父组件传值
+  3.输出属性：用@Output()装饰器修饰的属性为输出属性。
+    使用方法：
+    1.在子组件中使用@Output()注解要发送的属性，EventEmitter为angualr/core中声明的，其中的泛型为要发送数据的类型
+      @Output()
+      lastPrice:EventEmitter<PriceQuote> = new EventEmitter()
+    2.在函数逻辑中发射该数据
+      this.lastPrice.emit(priceQuote)
+    3.在父组件接收
+      注意父组件的自定义事件的名字是由子组件的输出属性的名字来决定的
+      <app-child (lastPrice)="priceQuoteHandler($event)"></app-child>
+      在父组件中写一个priceQuoteHandler（）方法用来处理该数据
+  没有父子组件关系的组件间通讯
+  4.中间人模式无非是结合上面两种方式实现兄弟组件间的通讯，即通过子组件A发射自定义事件给父组件，
+    然后父组件接收，用属性绑定的方式实现给子组件B传值
+七：生命周期
+八：表单
+    模板式表单：
+      ngForm：该指令会被自动的添加到form标签上，该指令隐式的创建一个FormGroup类的实例，并存储表单数据,
+          标有NgForm指令的HTML元素会自动发现其所有标有NgModel指令的标签，并将它们的值添加到表单模型中
+        1.如果不想angular接手我们的表单，则用ngNoForm指令  <form ngForm></form>    <form ngNoForm></form>
+
+        2.ngForm指令可以在本地模板变量引用，以便在模板中访问。
+          <form #myForm = "ngForm" (ngSubmit)="onSubmit()"></form>
+          {{myForm.value | json}}
+
+      ngModel：代表表单中的一个字段，该指令会隐式的创建一个FormControl实例，并存储该对象的值
+        1.在ngForm标记的html元素内，使用ngModel是不用[{}],而是直接使用，但是要写一个name属性，作为该值在FormGroup类的实例的字段
+        2.该指令同样也可以被本地模板变量引用
+        <form #myForm = "ngForm" (ngSubmit)="onSubmit()">
+          <div>username: <input #username="ngModel" ngModel name="username"></input></div>
+        </form>
+        {{username.value}}
+
+      ngModelGroup:代表表单的一部分，将表单元素组织在一起，让表单结构更清晰。该指令隐式的创建一个FormGroup类的实例，该实例
+          是嵌套在ngForm实例中的一个对象
+          <div ngModelGroup = "userInfo">
+            <div>username: <input #username="ngModel" ngModel name="username"></input></div>
+            <div>username: <input #username="ngModel" ngModel name="username"></input></div>
+          </div>
+
+    响应式表单：
+      FormControl:构成表单的基本元素，通常代表一个input，但是也可以代表一个复杂的表单如日历
+          username:FormControl = new FormControl("aaa")  接受的参数为初始值
+      FormGroup:既可以代表表单的一部分，也可以代表整个表单
+          formModel:FormGroup = new FormGroup({
+            from:new FormControl(),
+            to:new FormControl(),
+          })
+      FormArray:代表一个可以增长的字段集合,注意他接受的参数是一个数组，没有一个相关的key,访问里面的子集只能用序号
+          emails:FormArray = new FormArray([
+                new FormControl(),
+                new FormControl(),
+          ])
+
+      响应式表单的指令
+        注意：响应式表单的指令不能和模板式表单的指令一样，可以别本地模板变量引用，他是不能被引用的。所以他只能在代码中
+        操作，而不能在模板中操作
+
+        formGroup:需要使用属性绑定语法，代表一整个表单
+        formGroupName：不需要属性绑定，只要指定相应的字符串，和模板链接
+        formControl:需要使用属性绑定语法，不能用在formGroup表单中，只能单独使用
+        formControlName：不需要属性绑定，只要指定相应的字符串
+        fromArrayName：不需要属性绑定，只要指定相应的字符串
+
+      FormBuilder：简化了定义表单数据的语法，他有三个方法，fb.array fb.control fb.group 分别对应上面三个类，
+        使用该类来定义表单大大简化了代码，而且还有更多的配置
+        constructor(fb:FormBuilder){
+          this.formModel = fb.group({
+            username:['默认值',[校验方法，数组说明可以有多个校验方法],[异步校验方法]],
+            emails:fb.array([
+              fb.control('aaa'),
+              ["bbb"]
+            ]),
+            dateRange:fb.group({
+              start:[''],
+              end:['']
+            })
+          },{validator:校验器})
+        }
+      状态字段
+          touched和untouched：判断某字段是否获取过焦点，获取过焦点，touched为true,untouched为false,反之
+          pristine和dirty:如果一个字段的值从来都没有被改变过，则pristine为true,dirty为false,反之
+          注意：angular会根据表单的状态，添加一些类名及样式，如果想自定义样式，则找打对应的类名填写样式即可
+    模板表单验证：
+      1.模板式表单的控制器中是没有代码的，因此想要在模板式表单里面添加验证，就必须通过指令来完成，
+        需要将校验器包装成自定义指令来完成校验
+      2.将校验器函数通过依赖注入的方式注入到指令中就完成了包装，注意:其中的token是固定的，useValue为校验器的函数名，multi
+        为true表示NG_VALIDATORS这同一个token下面，可以绑定多个值
+        providers:[{provide:NG_VALIDATORS, useValue:mobileValidator},multi:true]
+      3.angular提供的默认的校验器如required/minlength等都有对应的指令，为了区分表单元素上面的效验器（如required）是angular
+        提供的还是原生表单的属性，需要在form标签上写上novalidate
+      4.由于模板式表单的组件中没有可以编程控制的数据模型，因此需要在提交函数里面将校验的状态传入到组件中
+      5.在表单不符要求是需要提示信息和响应式编程的差不多，需要用到表单的hasError（）方法，但是这里就要用模板本地变量来调用
+        如myForm.form.hasError（）
+      6.模板式表单的值和状态的变更不同于响应式表单，他是异步的，因此不能像响应式表单那样使用状态字段开控制错误信息的显示与
+        隐藏，需要改表单元素绑定函数，将模板本地变量应用的form传入函数，在组件中将该form的状态字段赋值给变量，然后在提示信息、
+        上绑定该变量从而实现该功能
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

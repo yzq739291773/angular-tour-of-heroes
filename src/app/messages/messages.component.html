@@ -1,0 +1,12 @@
+<div *ngIf="messageService.messages.length">
+
+  <h2>Messages</h2>
+  <button class="clear"
+          (click)="messageService.clear()">clear</button>
+  <div *ngFor='let message of messageService.messages'> {{message}} </div>
+
+</div>
+<h3>我是路由的传参id：{{id}}</h3>
+<h3>路由守卫获得的参数</h3>
+<p>productId:{{productId}}</p>
+<p>productName:{{productName}}</p>

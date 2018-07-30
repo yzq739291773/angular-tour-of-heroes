@@ -1,0 +1,15 @@
+<div>
+  <h2>管道</h2>
+  <p>{{birthday}}</p>
+  <p>我的生日是{{birthday | date : 'yyyy-mm-dd HH:mm:ss'}}</p>
+  <p>我的生日是{{birthday | date | uppercase | lowercase}}</p>
+
+  <p>圆周率是{{PI}}</p>
+  <!--2为整数位数，1-4表示小数位数最少为一位最多为4位-->
+  <p>圆周率是{{PI | number:'2.1-4'}}</p>
+
+  <p>自定义管道{{size | multiple}}</p>
+  <p>自定义管道{{size | multiple:2}}</p>
+
+
+</div>

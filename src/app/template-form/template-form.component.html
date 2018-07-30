@@ -1,0 +1,37 @@
+<form #myForm="ngForm" (ngSubmit)="onSubmit(myForm.value, myForm.valid)" novalidate>
+  <div>用户名
+    <!--<input （input）="onMobileInput(myForm)" #username="ngModel"  required minlength="6"  ngModel name="username" type="text">-->
+    <input  #username="ngModel"  required minlength="6"  ngModel name="username" type="text">
+  </div>
+  <div [hidden]="mobileUntouched || mobileValid">
+    <div [hidden]="!myForm.form.hasError('required','username')">用户名是必填项</div>
+    <div [hidden]="!myForm.form.hasError('minlength','username')">最少为6位</div>
+  </div>
+  <div>手机号：<input ngModel mobile name="phone" type="text"></div>
+  <div ngModelGroup="passwordGroup">
+    <div>密码：<input ngModel name="password" type="text"></div>
+    <div>确认密码：<input ngModel name="comfirmPassword" type="text"></div>
+  </div>
+  <button type="submit">注册</button>
+</form>
+
+<!--<input #username (blur)="onClick(username)" type="text">-->
+<div>{{myForm.value | json}}</div>
+<div>{{username.value}}</div>
+
+<!--
+  1.模板式表单的控制器中是没有代码的，因此想要在模板式表单里面添加验证，就必须通过指令来完成，
+    需要将校验器包装成自定义指令来完成校验
+  2.将校验器函数通过依赖注入的方式注入到指令中就完成了包装，注意:其中的token是固定的，useValue为校验器的函数名，multi
+    为true表示NG_VALIDATORS这同一个token下面，可以绑定多个值
+    providers:[{provide:NG_VALIDATORS, useValue:mobileValidator},multi:true]
+  3.angular提供的默认的校验器如required/minlength等都有对应的指令，为了区分表单元素上面的效验器（如required）是angular
+    提供的还是原生表单的属性，需要在form标签上写上novalidate
+  4.由于模板式表单的组件中没有可以编程控制的数据模型，因此需要在提交函数里面将校验的状态传入到组件中
+  5.在表单不符要求是需要提示信息和响应式编程的差不多，需要用到表单的hasError（）方法，但是这里就要用模板本地变量来调用
+    如myForm.form.hasError（）
+  6.模板式表单的值和状态的变更不同于响应式表单，他是异步的，因此不能像响应式表单那样使用状态字段开控制错误信息的显示与
+    隐藏，需要改表单元素绑定函数，将模板本地变量应用的form传入函数，在组件中将该form的状态字段赋值给变量，然后在提示信息、
+    上绑定该变量从而实现该功能(不知道为什么绑定函数失败)
+-->
+

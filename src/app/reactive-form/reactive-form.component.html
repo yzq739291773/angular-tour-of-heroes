@@ -1,0 +1,20 @@
+<!--2.响应式表单指令的用法-->
+
+<!--formControl 不能用在formGroup里面，只能单独写在外面，如果想用在里面，必须写成formControlName-->
+<!--<div>用户名：<input [formControl]="userName" type="text"></div>-->
+<form [formGroup]="formModel" (submit)="onSubmit()">
+  <div>用户名：<input formControlName="username" type="text"></div>
+  <div formGroupName="dateRange">
+    起始日期：<input formControlName="from" type="date">
+    截止日期：<input formControlName="to" type="date">
+  </div>
+  <div>
+    <ul formArrayName="emails">
+      <li *ngFor="let e of this.formModel.get('emails').controls; let i = index;">
+        <input type="text" [formControlName]="i">
+      </li>
+    </ul>
+    <button type="button" (click)="addEmail()">增加email</button>
+  </div>
+  <button type="submit">保存</button>
+</form>
